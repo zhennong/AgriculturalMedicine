@@ -1,0 +1,20 @@
+/*add by wodrow start*/
+.minH300{
+    min-height: 350px;
+}
+.borderRightNone{
+    border-right: none;
+}
+/*add by wodrow start*/
+
+body{border:0px;margin:0px;padding:0px;}
+/*样式重写*/
+.ui-fixed-top{padding-top: 25px;}
+.ui-btn{padding: 0px;line-height: 40px;font-size:14px;font-weight: normal;}
+.ui-btn-inner{padding:0px;}
+.ui-body-c, .ui-body-c input, .ui-body-c select, .ui-body-c textarea, .ui-body-c button{font-family: "微软雅黑";}
+
+#showpic-box {text-align: center;margin-bottom: 25px;}
+#showpic-box  #showPic{width:300px;height:300px;}
+
+

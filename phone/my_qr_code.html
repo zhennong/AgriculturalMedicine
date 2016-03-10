@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<link type="text/css" rel="stylesheet" href="css/nywy.css"/>
+<link type="text/css" rel="stylesheet" href="css/responsive.css" />
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/appcan.control.js" type="text/javascript"></script>
+<script src="js/config.js" type="text/javascript"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script src="js/area.js" type="text/javascript"></script>
+<script type="text/javascript">
+appcan.ready(function(){
+    Tools.getUserId();
+    Tools.getUserName();       
+})    
+</script>   
+<script type="text/javascript">
+//获取用户信息    
+$(function(){    
+    $.ajax({  
+        type:'get',  
+        url : config.apiUrl, 
+        data:{action:'get_member_profile',userid:user_id},
+        dataType : 'jsonp',  
+        jsonp:"jsoncallback",  
+        success  : function(data) {  
+            if(data.status == 200){
+                //读取用户信息
+                if(data.member_profile['0']['member_profile']['avatar']){
+                    $("#avatar").attr("src",config.apiWebPath + data.member_profile['0']['member_profile']['avatar']);
+                } 
+                
+                if(data.member_profile['0']['userid']){
+                    $(".my_ewm").show();
+                    $(".my_ewm").attr("src",config.sourceUrl+"qr_img.php?userid="+data.member_profile['0']['userid']);                   
+                }
+                
+                getAreas(data.member_profile['0']['member_profile']['areaid']);                                 
+            }
+        },  
+        error : function() {}  
+    })
+    
+})
+</script>
+</head>
+<body>
+<div class="box">
+    <div class="head">
+        <a class="back" onclick="Tools.openUrl('member',1)"><span><img src="image/return.png"></span></a>
+        <h3>我的二维码</h3>
+    </div>
+
+    <div class="member_top scan">
+        <a onclick="Tools.openUrl('member_avatar',1);"><img id="avatar" src="image/default.jpg" class="member_tx scan"></a>
+        <p class="name">
+            <font id="username"></font>
+            <br>
+            <font id="area"></font>
+        </p>        
+    </div>
+    
+    <div class="qr_box">
+        <img src="" class="my_ewm" />
+    </div>
+    
+</div>
+</body>
+</html>

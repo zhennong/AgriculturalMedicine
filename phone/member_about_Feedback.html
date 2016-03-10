@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<link type="text/css" rel="stylesheet" href="css/nywy.css" />
+<link type="text/css" rel="stylesheet" href="css/responsive.css" />
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script type="text/javascript">
+appcan.ready(function(){
+    Tools.getUserId();    
+})    
+</script>
+<script type="text/javascript" charset="utf-8">
+$(function(){
+    // 字段验证
+    var checkInput = {
+        options:{},
+        check:function(){
+            var feed_content = $("#feed_content").val();
+            checkInput.options.feed_content = feed_content;
+            var feed_mail = $("#feed_mail").val();
+            checkInput.options.feed_mail = feed_mail;
+            if (feed_content == "") {
+                Tools.toast('反馈内容不能为空');
+                $("#feed_content").focus();
+                return false;
+            }
+            if (feed_mail == "") {
+                Tools.toast('手机号不能为空');
+                $("#feed_mail").focus();
+                return false;
+            }
+            return true;
+        }
+    }
+
+    $(".fill_btn").click(function(){
+        if(checkInput.check()){
+            $.ajax({  
+                type:'post',  
+                url : config.apiUrl, 
+                data:{action:'submit_feed_back',feed_content:checkInput.options.feed_content,feed_mail:checkInput.options.feed_mail},
+                dataType : 'jsonp',  
+                jsonp:"jsoncallback",  
+                success  : function(msg) {  
+                    if(msg.status == 200){
+                        Tools.toast('提交成功');
+                    }                   
+                },  
+                error : function() {  
+                    //alert('fail');  
+                }  
+            })  
+        }  
+    })
+})
+</script>
+</head>
+<body>
+    
+<div class="box">
+    <div class="head">
+        <a class="back" onclick="Tools.openUrl('member',1)"><span><img src="image/return.png"></span></a>
+        <h3>意见反馈</h3>
+    </div>
+
+    <div class="feedback_search">
+        <div class="fill_sm">
+            <textarea name="feed_content" id="feed_content" placeholder="请输入反馈内容"></textarea>
+            <input name="feed_mail" id="feed_mail" type="text" class="feedback_con" placeholder="您的邮箱或手机号" value=""/>
+        </div>
+        <button type="button" class="fill_btn">提交</button>
+    </div>
+</div>    
+        
+
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    </div>
+
+</body>
+</html>

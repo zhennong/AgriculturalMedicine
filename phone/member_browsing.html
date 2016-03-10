@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<link type="text/css" rel="stylesheet" href="css/nywy.css" />
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script type="text/javascript">
+appcan.ready(function(){
+    Tools.getUserId();    
+})    
+</script>
+<script type="text/javascript">
+$(function(){
+	var content = "";
+	appcan.ajax({  
+		type:'get',  
+		url : config.apiUrl, 
+		data:{action:'get_browsing_history',userid:userid},
+		dataType : 'jsonp',  
+		jsonp:"jsoncallback",  
+		success  : function(data) {  
+			$.each(data,function(index,value){
+				content += "<div class='search_list'>" ;
+				content += "<a href='#'>" ;
+				content += "<ul>" ;
+				content += "<li class='sear_p'>小麦田用草药二钾四氯钠，麦田旁边种有莴苣有没有影响？</li>" ;
+				content += "<li class='sear_t'><img src='image/defaultx20.jpg' class='tx' /><span>阿涛fsgweg</span><img src='image/tb03.png' class='sear_icon' /><span>23分钟前</span><b>已回答(2)</b></li>" ;
+				content += "</ul>" ;
+				content += "</a>" ;
+				content += "<div class='clear'></div>" ;
+				content += "</div>" ;
+				$(".search_list").append(content);
+			}) 
+		},  
+		error : function() {  
+			//alert('fail');  
+		}  
+	})  
+})
+</script>
+</head>
+<body>
+<div class="box">
+	<div class="head">
+		<a id="back"><span><img src="image/return.png"></span></a>
+		<h3>浏览记录</h3>
+	</div>
+	<div class="history-box"></div>
+</div>
+</body>
+</html>

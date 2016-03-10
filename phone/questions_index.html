@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<link type="text/css" rel="stylesheet" href="css/nywy.css"/>
+<link type="text/css" rel="stylesheet" href="css/responsive.css" />   
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/config.js" type="text/javascript"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script src="js/area.js" type="text/javascript"></script>
+<script type="text/javascript">  
+$(function(){    
+    //栏目热门推荐
+    $.ajax({  
+        type:'get',  
+        url : config.apiUrl, 
+        data:{action:'get_hot_category'},
+        dataType : 'jsonp',  
+        jsonp:"jsoncallback",  
+        success  : function(msg) {            
+            if(msg.status == 200){
+               if(msg.hot_category_list == null){
+                   $(".class_icon").css("display","none");
+                   return false;
+               }               
+               var str = "";               
+               if(msg.hot_category_list.length > 0){
+                   $(".class_icon").css("display","block");
+                   $.each(msg.hot_category_list,function(index,value){
+                       str += "<li id='li_cat' data-id='"+msg.hot_category_list[index]['id']+"'><img src='"+config.uploads_path+msg.hot_category_list[index]['cat_img']+"' class='shortcut_icon'>"+msg.hot_category_list[index]['cat_name']+"</li>";
+                   })  
+                   $(".more_cat").hide();
+                   if(!user_id){
+                       str += "<li id='more_cat'><img src='image/class_more.png' class='shortcut_icon'>更多专区</li>";
+                   }
+                   $(".category").append(str);                
+               }
+            }
+        },  
+        error : function() {}  
+    }) 
+    
+	//获取用户个人分类
+	if(user_id != null){
+		$.ajax({  
+			type:'get',  
+			url : config.apiUrl, 
+			data:{action:'get_my_category_list',userid:user_id},
+			dataType : 'jsonp',  
+			jsonp:"jsoncallback",  
+			success  : function(msg) {  
+				if(msg.status == 200){				    
+					var x = msg.my_category_list;
+					var str = "";					
+					if(x == null){
+					    return false;
+					}					
+					$.each(x,function(index,value){
+						str +="<li id='li_cat' data-id='"+x[index]['id']+"'><img src='"+config.uploads_path+x[index]['cat_img']+"' class='shortcut_icon'>"+x[index]['cat_name']+"</li>";
+					})
+					$(".more_cat").hide();
+					str += "<li id='more_cat'><img src='image/class_more.png' class='shortcut_icon'>更多专区</li>";
+					$(".category").append(str);
+				}
+			},  
+			error : function() {}  
+		}) 
+	}
+	
+	//点击链接相应的分类页
+	$('.category').on('click','li#li_cat',function(){
+		appcan.locStorage.setVal('cat_id',$(this).data('id'));
+		Tools.openUrl('questions_list');                    
+	});
+	
+	$('.category').on('click','li#more_cat',function(){    
+	    Tools.openUrl('select_category');    
+	});
+	
+})
+		  
+function get_ask_index_list(start,limit){
+	appcan.ajax({
+		type: 'get',
+		url: config.apiUrl,
+		data: {action: 'get_ask_list',start:start,limit:limit},
+		dataType: 'jsonp',
+		jsonp: "jsoncallback",
+		success: function (msg) {	    
+			if (msg.status == 200) {
+			  var str = "";
+			  var area = "";
+			  var address = "";
+			  var avatar = "";
+			  if(msg.ask_list == null){
+			      // $(".list-box").empty();
+			      if($(".empty").size()>0){}else{
+			          str += "<p class='empty center'>暂无数据~~</p>";
+			      }
+			      $(".list-box").append(str);
+                  return false;
+			  }
+			  		  
+			  if(msg.ask_list.length > 0){
+    			  $.each(msg.ask_list, function (index, value) {
+    			      //alert(msg.ask_list[index]['location']); GPS
+    			      if(msg.ask_list[index]['area'] == null){
+    			          //默认未选择地区读取GPS地址信息
+                          if(msg.ask_list[index]['location'] == null){
+                            area = "未知区域";
+                          }else{
+                            area = msg.ask_list[index]['location'];
+                          }
+    			      }else{
+    			          area = msg.ask_list[index]['area'];   
+    			          if(msg.ask_list[index]['address'] == null){
+                              address = "";
+                          }else{
+                              address = msg.ask_list[index]['address'];
+                          }
+    			      }
+    				  	  
+    				  if(msg.ask_list[index]['avatar'] == null){    				     
+    				      avatar = "image/defaultx20.jpg";   
+    				  }else{
+    				      avatar = config.domainName + msg.ask_list[index]['avatar'];
+    				  }    				  
+    				  str += "<div class='list list-ask' data-catid='"+ msg.ask_list[index]['catid'] +"' data-askid='" + msg.ask_list[index]['id'] + "'>";
+    				  str += "<a href='#'>";
+    				  str += "<ul>";
+    				  str += "<li class='list_t'>";
+    				  str += "<img src='"+avatar+"' class='tx'/><span>" + msg.ask_list[index]['nickname'] + "</span>";
+    				  if(msg.ask_list[index]['member_type'] == 'expert'){
+    					 str += "<font class='mem_type'>专家</font>";
+    				  }else{
+    					 str += "<font class='mem_type'>地主</font>"; 
+    				  }
+    				  
+    				  str += "<img src='image/closely.png' data='"+msg.ask_list[index]['uid']+"' id='attention'  class='closely'/>";
+    				  str += "</li>";
+    
+    				  if (msg.ask_list[index]['image_count'] > 0) {
+    					str += "<li class='list_img clearfix'>";
+    					$.each(msg.ask_list[index]['ask_images'], function (index1, value1) {
+    						switch (msg.ask_list[index]['image_count']) {
+    						  case 1:
+    							  str += "<img src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "' class='one_img' />";
+    							  break;
+    						  case 2:
+    							  str += "<img id='id2_"+index1+"' src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "' class='two_img' />";
+    							  break;
+    						  case 3:
+                                  str += "<img id='id3_"+index1+"' src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "' class='two_img' />";
+                                  break;	  
+    						  case 4:
+    							  str += "<img id='id4_"+index1+"' src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "' class='two_img' />";
+    							  break;
+    						  case 5:
+                                  str += "<img id='id5_"+index1+"' src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "' class='two_img' />";
+                                  break;	  
+    						  default:
+    							  str += "<img id='id4_"+index1+"' src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "' class='three' />";
+    							  break;
+    						}
+    					})
+    					str += "</li>";
+    				  }
+    
+    				  str += "<li class='list_p'>" + msg.ask_list[index]['content'] + "</li>";
+    				  str += "<li class='posit'><img src='image/position_icon.png' class='poi_icon'/>"+ area + address + "</li>";
+    				  str += "<li class='list_b'>";
+    				  str += "<a><img src='image/answer_icon.png' width='25' class='b_icon'/><span>已回答("+msg.ask_list[index]['answer_count']+")</span></a>";
+    				  str += "<a class='share-btn'><img src='image/share_icon.png' width='25' class='b_icon b_icon_1'/><span>分享</span></a>";
+    				  str += "<a class='borderRightNone'><img src='image/my_answer_icon.png' width='25' class='b_icon'/><span>我来回答</span></a>";
+    				  str += "</li>";
+    				  str += "</ul>";
+    				  str += "</a>";
+    				  str += "<div class='clear'></div>";
+    				  str += "</div>";                              
+    			  })
+			  }else{
+			      if($(".empty").size()>0){}else{
+                      str += "<p class='empty center'>暂无数据~~</p>";
+                  }
+                  // return false;
+			  }
+			  
+			  $(".list-box").append(str);
+			}
+		},
+		error: function () {}
+	});
+}
+
+$(function () {
+	var limit = config.ask_list_limit;
+	get_ask_index_list(0,limit);  
+		
+	window.uexOnload = function(type) {
+		appcan.frame.setBounce([0,1],function(type) {
+			setTimeout(function() {
+				var start = $('body').data('start');
+				start = start + limit;
+				$('body').data('start',start);
+				appcan.frame.resetBounce(type);
+				get_ask_index_list(start,limit);  
+			}, 1000);
+		});
+	}
+	$('.list-box').on('click','li.list_img,li.list_p',function(){
+	    appcan.locStorage.setVal('cat_id',$(this).parents('.list-ask').data("catid"));
+		appcan.locStorage.setVal('askid',$(this).parents('.list-ask').data("askid"));
+		Tools.openUrl('questions_show');
+	});
+	
+	$('.list-box').on('click','.borderRightNone',function(){
+		appcan.locStorage.setVal('askid',$(this).parents('.list-ask').data("askid"));
+		Tools.openUrl('questions_answer');
+	});
+	
+	// $('.list-box').on('click','.share-btn',function(){
+        // $(".bg.gray").fadeIn(100);
+        // $(".share").slideDown(500);
+    // });
+//     
+    // $('#cancel').click(function(){
+        // $(".share").slideUp(500);
+        // $(".bg.gray").fadeOut(1000);
+    // })
+	
+	$('.list-box').on('click','#attention',function(){
+		var attention_uid = $(this).attr("data");
+		if(user_id != null){
+			$.ajax({  
+				type:'get',  
+				url : config.apiUrl, 
+				data:{action:'add_attention',attention_uid:attention_uid,fans_uid:user_id},
+				dataType : 'jsonp',  
+				jsonp:"jsoncallback",  
+				success  : function(msg) {  
+					if(msg.status == 200){
+					    $(this).attr('src','images/closely_on.png');
+						appcan.window.openToast("关注成功~", 3000, '5', '0');	
+						Tools.refresh('member');					
+					}else if(msg.status == 215){
+						appcan.window.openToast("不能关注自己哦~", 3000, '5', '0');
+					}else if(msg.status == 217){
+						appcan.window.openToast("您已经关注过~", 3000, '5', '0');
+					}else{
+						appcan.window.openToast("关注失败~", 3000, '5', '0');
+					}
+				},  
+				error : function() {}  
+			}) 
+		}else{
+			appcan.window.openToast("请先登录！", 3000, '5', '0');
+			Tools.openUrl('login');
+		}
+	});
+	
+	/**
+	  * 分享代码
+	  */
+	//微信好友
+	$(".share ul li:eq(0)").click(function(){
+	    //alert(1);
+	})
+	
+	//微信朋友圈
+	$(".share ul li:eq(1)").click(function(){
+        //alert(2);
+    })
+    
+    //QQ空间
+    $(".share ul li:eq(2)").click(function(){
+        //alert(3);
+    }) 
+});
+</script>           
+</head>
+<body data-start="0">
+   
+<div class="box">
+	<div class="banner">
+		<img src="image/banner.jpg"/>
+	</div>
+	<div class="class_icon">
+		<ul class="category"></ul>
+		<div class="clear"></div>
+	</div>
+	<div class="question">
+		<p class="ques_title">快速提问<a onclick="Tools.openUrl('questions_quick_ask')">快速提问</a></p>
+	</div>
+
+	<div class="list-box" id="list-box"></div>
+
+	<div style="min-height:110px;"></div>
+	<div class="foot">
+		<div class="footer">
+			<ul>
+				<li id="home"><a href="javascript:void(0)" onclick="Tools.openUrl('index')"><img src="image/main.png"></a></li>
+				<li id="ask_center"><a href="javascript:void(0)" onclick="Tools.openUrl('questions_index')"><img src="image/answer_on.png"></a></li>   
+				<li id="member_center"><img src="image/mine.png"></li>
+			</ul>
+		</div>
+	</div>
+</div> 
+
+<div class="bg gray"></div>
+<div class="share">
+    <ul class="clearfix">
+        <li><img src="image/ico_wechat.png" /><br/>微信好友</li>
+        <li><img src="image/ico_friend.png" /><br/>微信朋友圈</li>
+        <li><img src="image/ico_qzone.png" /><br/>QQ空间</li>
+    </ul>
+    <a id="cancel">取消</a>
+</div> 
+
+</body>
+</html>

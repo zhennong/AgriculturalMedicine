@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<link type="text/css" rel="stylesheet" href="css/main.css" />
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/config.js" type="text/javascript"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script type="text/javascript">
+appcan.ready(function(){
+    Tools.getUserId();    
+})    
+</script>
+<script type="text/javascript">
+function get_favourite_list(type,id,name){
+    appcan.ajax({
+        type: 'get',
+        url: config.apiUrl,
+        data: {action: 'my_fans',userid:user_id,type:type},
+        dataType: 'jsonp',
+        jsonp: "jsoncallback",
+        success: function (msg) {
+            if(msg.status == 200){
+                var str = "";
+                if(msg.fans_list == null){
+                    str+="<div class='people center'>";
+                    str+="<p>暂无数据~~</p>";
+                    str+="</div>";
+                    $("#con_one_"+id).append(str);
+                    
+                    return false;
+                }
+                
+                if(msg.fans_list.length > 0){
+                    $.each(msg.fans_list,function(index,value){
+                        str+="<div class='people'>";
+                        str+="    <p class='symptoms_t'>";
+                        if(msg.fans_list[index]['fans_detail']['member_profile']['avatar']){
+                            str +="<img src='"+config.domainName + msg.fans_list[index]['fans_detail']['member_profile']['avatar']+"' class='tx' />";
+                        }else{
+                            str +="<img src='image/defaultx20.jpg' class='tx' />";
+                        }
+                        str+="    <span>"+msg.fans_list[index]['fans_detail']['member_profile']['nickname']+"</span>";
+                        str+="    <span class='mem_type'>"+name+"</span>";
+                        str+="    <br />";
+                        str+="    <img src='image/position_icon.png' class='dree'/>";
+                        str+="    <span class='address'>"+msg.fans_list[index]['fans_detail']['member_profile']['area_name']+"</span>";
+                        str+="    <div class='clear'></div>";
+                        str+="</div>";
+                    })
+                }else{
+                    str+="<div class='people center'>";
+                    str+="<p>暂无数据~~</p>";
+                    str+="</div>";
+                }
+                $("#con_one_"+id).append(str);
+            }
+        },error: function(){
+             
+        }
+    }) 
+}
+
+get_favourite_list('landlord',1,'地主');
+get_favourite_list('expert',2,'专家');
+   
+</script>
+</head>
+<body>
+<div class="box">
+	<div class="head">
+		<a class="back" onclick="Tools.closeUrl('member')"><span><img src="image/return.png"></span></a>
+		<h3>我的粉丝</h3>
+	</div>
+	
+	<div class="mt55">
+		<ul class="new">
+			<li id="one1" onmouseover="Tools.setTab('one',1,2)" class="hover">地主</li>
+			<li id="one2" onmouseover="Tools.setTab('one',2,2)">专家</li></a>
+			<div class="clear"></div>
+		</ul>
+	</div>
+	
+	<div class="Contentbox">
+		<div id="con_one_1" class="hover"></div>            
+		<div id="con_one_2" class="hidden"></div>
+	</div>
+</div>
+</body>
+</html>

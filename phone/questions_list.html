@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<link type="text/css" rel="stylesheet" href="css/nywy.css" />
+<link type="text/css" rel="stylesheet" href="css/responsive.css" />   
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/config.js" type="text/javascript"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(function(){
+	var cat_id = appcan.locStorage.getVal('cat_id'); 
+	function get_ask_index_list(start,limit){
+		appcan.ajax({
+			type: 'get',
+			url: config.apiUrl,
+			data: {action: 'get_ask_list',start:start,limit:limit,cat_id:cat_id},
+			dataType: 'jsonp',
+			jsonp: "jsoncallback",
+			success: function (msg) {
+				if (msg.status == 200) {
+				  var str = "";		
+				  var avatar = "";
+				  var area = "";
+                  var address = "";		  
+				  if(msg.ask_list == null){
+				      if($(".empty").size()>0){}else{
+                          str += "<p class='empty center'>暂无数据~~</p>";
+                      }
+				      $(".list-box").append(str);
+				      return false;
+				  }				  
+				  if(msg.ask_list.length > 0){
+    				  $.each(msg.ask_list, function (index, value) {                          
+                          if(msg.ask_list[index]['avatar'] == null){                         
+                              avatar = "image/defaultx20.jpg";   
+                          }else{
+                              avatar = config.domainName + msg.ask_list[index]['avatar'];
+                          } 
+                          
+                          if(msg.ask_list[index]['area'] == null){
+                              //默认未选择地区读取GPS地址信息
+                              if(msg.ask_list[index]['location'] == null){
+                                area = "未知区域";
+                              }else{
+                                area = msg.ask_list[index]['location'];
+                              }
+                          }else{
+                              area = msg.ask_list[index]['area'];   
+                          }
+                          
+                          if(msg.ask_list[index]['address'] == null){
+                              address = "";
+                          }else{
+                              address = msg.ask_list[index]['address'];
+                          }  
+                      
+    					  str += "<div class='list list-ask' data-catid='" + msg.ask_list[index]['catid'] + "' data-askid='" + msg.ask_list[index]['id'] + "'>";
+    					  str += "<a href='#'>";
+    					  str += "<ul>";
+    					  str += "<li class='list_t'>";
+    					  str += "<img src='"+avatar+"' class='tx'/><span>" + msg.ask_list[index]['nickname'] + "</span>";
+    					  if(msg.ask_list[index]['member_type'] == 'expert'){
+                             str += "<font class='mem_type list'>专家</font>";
+                          }else{
+                             str += "<font class='mem_type list'>地主</font>"; 
+                          }
+    					  // str += "<span>" + msg.ask_list[index]['addtime_date'] + "</span>";
+    					  str += "<img src='image/closely.png' data='"+msg.ask_list[index]['uid']+"' id='attention' class='closely' width='33'/>";
+    					  str += "</li>";
+    
+    					  if (msg.ask_list[index]['image_count'] > 0) {
+    						str += "<li class='list_img'>";
+    						$.each(msg.ask_list[index]['ask_images'], function (index1, value1) {
+    							switch (msg.ask_list[index]['image_count']) {
+    							  case 1:
+    								  str += "<img src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "'/>";
+    								  break;
+    							  case 2:
+    								  str += "<img id='id2_"+index1+"' src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "'/>";
+    								  break;
+                                  case 3:
+                                      str += "<img id='id3_"+index1+"' src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "'/>";
+                                      break;    								  
+    							  case 4:
+    								  str += "<img id='id4_"+index1+"' src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "'/>";
+    								  break;
+    							  case 5:
+                                      str += "<img id='id5_"+index1+"' src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "'/>";
+                                      break;	  
+    							  default:
+    								  str += "<img id='id4_"+index1+"' src='" + config.apiWebPath + msg.ask_list[index]['ask_images'][index1] + "'/>";
+    								  break;
+    							}
+    						})
+    						str += "</li>";
+    					  }
+    
+    					  str += "<li class='list_p'>" + msg.ask_list[index]['content'] + "</li>";
+    					  str += "<li class='posit'><img src='image/position_icon.png' width='25' class='poi_icon'/>"+ area + address +"</li>";
+    					  str += "<li class='list_b'>";
+    					  str += "<a><img src='image/answer_icon.png' class='b_icon'/><span>已回答("+msg.ask_list[index]['answer_count']+")</span></a>";
+    					  str += "<a><img src='image/share_icon.png' class='b_icon b_icon_1'/><span>分享</span></a>";
+    					  str += "<a class='borderRightNone'><img src='image/my_answer_icon.png' class='b_icon'/><span>我来回答</span></a>";
+    					  str += "</li>";
+    					  str += "</ul>";
+    					  str += "</a>";
+    					  str += "<div class='clear'></div>";
+    					  str += "</div>";
+    				  })
+				  }else{
+				      if($(".empty").size()>0){}else{
+                          str += "<p class='empty center'>暂无数据~~</p>";
+                      }
+				  }
+				  $(".list-box").append(str);
+				}
+			},
+			error: function () {}
+		});
+	}
+
+
+	var limit = config.ask_list_limit;
+	get_ask_index_list(0,limit);  
+	
+	window.uexOnload = function(type) {
+		appcan.frame.setBounce([0,1],function(type) {
+			setTimeout(function() {
+				var start = $('body').data('start');
+				start = start + limit;
+				$('body').data('start',start);
+				appcan.frame.resetBounce(type);
+				get_ask_index_list(start,limit);  
+			}, 1000);
+		});
+	}
+	
+	$('.list-box').on('click','li.list_img,li.list_p',function(){
+	    appcan.locStorage.setVal('cat_id',$(this).parents('.list-ask').data("catid"));
+		appcan.locStorage.setVal('askid',$(this).parents('.list-ask').data("askid"));
+		Tools.openUrl('questions_show');
+	});	
+	
+	$('.list-box').on('click','.borderRightNone',function(){
+		appcan.locStorage.setVal('askid',$(this).parents('.list-ask').data("askid"));
+		Tools.openUrl('questions_answer');
+	});
+	
+	$('.list-box').on('click','#attention',function(){
+		var attention_uid = $(this).attr("data");
+		if(user_id != null){
+			$.ajax({  
+				type:'get',  
+				url : config.apiUrl, 
+				data:{action:'add_attention',attention_uid:attention_uid,fans_uid:user_id},
+				dataType : 'jsonp',  
+				jsonp:"jsoncallback",  
+				success  : function(msg) {  
+					if(msg.status == 200){
+					    $(this).attr('src','images/closely_on.png');
+						appcan.window.openToast("关注成功~", 3000, '5', '0');
+					}else if(msg.status == 215){
+						appcan.window.openToast("不能关注自己哦~", 3000, '5', '0');
+					}else if(msg.status == 217){
+						appcan.window.openToast("您已经关注过~", 3000, '5', '0');
+					}else{
+						appcan.window.openToast("关注失败~", 3000, '5', '0');
+					}
+				},  
+				error : function() {}  
+			}) 
+		}else{
+			appcan.window.openToast("请先登录！", 3000, '5', '0');
+			Tools.openUrl('login');
+		}
+	});
+								
+	//获取分类信息
+	$.ajax({  
+		type:'get',  
+		url : config.apiUrl, 
+		data:{action:'get_community',cat_id:cat_id},
+		dataType : 'jsonp',  
+		jsonp:"jsoncallback",  
+		success  : function(msg) {  
+			var data = msg.category_list_info;			
+			if(msg.status == 200){
+			   if(data[0]['cat_img']){ 
+					$(".crop_tb").html("<img src='"+config.uploads_path + data[0]['cat_img']+"' />");
+			   }
+			   $(".crop_txt font").html(data[0]['cat_name']+"专区");
+			   $(".crop_txt span").html("成员" +msg['member_count']);
+			   $("#join").attr('data-id',data[0]['id']);
+			}
+		},  
+		error : function() {}  
+	})
+	
+	//加入分组                
+	$(".crop").on('click','#join',function(){
+		var userid = appcan.locStorage.getVal('userid');
+		if(!userid){
+			Tools.openUrl('login');
+		}
+		var cat_id = $("#join").data('id');
+		$.ajax({
+			type:'GET',  
+			url : config.apiUrl, 
+			data:{action:'add_select_category',userid:userid,cat_id:cat_id},
+			dataType : 'jsonp',  
+			jsonp:"jsoncallback",  
+			success  : function(msg) { 
+				if(msg.status == 200){
+					Tools.toast('添加成功');
+				}else if(msg.status == 217){
+					Tools.toast('已添加');
+				}else{
+					Tools.toast('添加失败');
+				}
+			}
+		});
+	});
+	
+	//按照栏目ID添加快速提问
+    $("#my_ask").click(function(){
+        appcan.locStorage.setVal('cat_id',cat_id);
+        Tools.openUrl('questions_quick_ask')
+    })
+		
+});
+
+</script> 
+</head>
+<body  data-start="0">
+<div class="box">
+	<div class="head">
+		<a id="back" ><span><img src="image/return.png"></span></a>
+		<h3>圈子</h3>
+	</div>
+
+	<div class="crop">
+		<p class="crop_tb"><img src="image/class_tp3.png" /></p>
+		<p class="crop_txt" style='position:relative;top:-5px;'>
+			<font></font><br /><span></span>
+		</p>
+		<a id="join">加入</a>
+		<div class="clear"></div>
+	</div>
+
+	<div class="list-box" id="list-box"></div>
+
+	<div style="min-height:90px;"></div>
+	<div class="foot_qz">
+		<p><a id="my_ask"><img src="image/bj.png"/>我要提问</a></p>
+	</div>
+</div>
+</body>
+</html>

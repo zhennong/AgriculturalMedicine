@@ -1,0 +1,5 @@
+/***重写样式***/
+.Contentbox{}
+.Contentbox .hidden{display: none;}
+
+.tg,.textarea_1{border:1px solid #dadada;border-radius: 3px;margin: 5px 0;}

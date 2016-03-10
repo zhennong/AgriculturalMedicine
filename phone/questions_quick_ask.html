@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<link type="text/css" rel="stylesheet" href="css/nywy.css"/>
+<link type="text/css" rel="stylesheet" href="css/responsive.css" />   
+<script src="js/config.js" type="text/javascript"></script>
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script src="js/category.js" type="text/javascript"></script>
+<script type="text/javascript">
+//判断用户状态
+appcan.ready(function () {    
+    Tools.getUserId();
+})
+</script>    
+</head>
+<body>
+<div class="box">
+    <div class="head">
+        <a id="back"><span><img src="image/return.png"></span></a>
+        <h3>快速提问</h3>
+    </div>
+    <div class="quick">
+        <div id="quick_ask">
+            <div class="camera" onclick="Tools.openUrl('upload_ask_image',1);">
+                <center><img src="image/tb06.png"/></center>
+            </div>
+            <center>快速提问</center>
+        </div>
+        <div class="imgList clearfix"></div>
+        <div id="reset_ask_images">重选图片</div>
+        
+        <textarea class="textarea" name="textarea" placeholder="请输入您的问题，并详细描述..."></textarea>
+        
+        <div class="cate-box clearfix">
+            <label>请选择栏目：</label>
+            <select class="category" id="first" name="first">
+                <option value="">请选择</option>
+            </select>           
+            <select class="category" id="second" name="second">
+                <option value="">请选择</option>
+            </select>           
+            <select class="category" id="third" name="third">
+                <option value="">请选择</option>
+            </select>               
+            <input type="text" name="cat_id" id="cat_id" value=""/> 
+        </div>
+        
+        <input type="submit" class="submit_btn" value="提交问题"/>
+    </div>
+</div>
+
+<script type="text/javascript">
+//获取用户上传图片    
+function get_ask_img(){  
+    //获取图片信息
+    appcan.ajax({    
+        type:'get',  
+        url : config.apiUrl, 
+        data:{action:'get_ask_images',userid:user_id},
+        dataType : 'jsonp',  
+        jsonp:"jsoncallback",  
+        success  : function(msg) {  
+            if(msg.status == 200){  
+                if(msg['user_ask_image_' + user_id] == null){
+                    return false;
+                } 
+                
+                if(msg['user_ask_image_' + user_id].length > 0){             
+                    $.each(msg['user_ask_image_' + user_id],function(index,value){
+                        if(index > 0){    
+                            $(".imgList").append("<div><img src="+ config.apiWebPath + value +" /></div>");
+                            $("#reset_ask_images").show();
+                        }   
+                       
+                        if(index > 4){
+                           $("#quick_ask").hide();
+                        }                   
+                    })
+                }
+            }                
+        },  
+        error : function() {}  
+    })
+}
+get_ask_img();
+
+$(function(){    
+    $("#reset_ask_images").click(function(){
+        appcan.ajax({    
+            type:'get',  
+            url : config.apiUrl, 
+            data:{action:'reset_ask_images',userid:user_id},
+            dataType : 'jsonp',  
+            jsonp:"jsoncallback",  
+            success  : function(msg) {  
+                if(msg.status == 200){
+                    Tools.toast('重置成功');
+                    Tools.openUrl('questions_quick_ask',1);
+                }                
+            },  
+            error : function() {}  
+        })
+    })
+    
+    
+    
+    //获取栏目id
+    var cat_id = appcan.locStorage.getVal('cat_id');    
+    if(cat_id == null){
+        $(".cate-box").show();        
+    }    
+    
+    $(".submit_btn").click(function(){  
+        if(cat_id != null){
+            cat_id = cat_id;
+        }else{
+            cat_id = $("#cat_id").val();
+            if(cat_id == ""){
+                Tools.toast('必须选择对应的栏目');
+                return false;
+            }
+        }
+        var content = $("textarea").val();
+        if(content == ""){
+            Tools.toast('详细描述不能为空~~');
+            return false;
+        }
+        appcan.ajax({
+            type:'get',  
+            url : config.apiUrl, 
+            data:{action:'submit_quick_ask',cat_id:cat_id,content:content,userid:user_id},
+            dataType : 'jsonp',  
+            jsonp:"jsoncallback",  
+            success  : function(msg) {  
+                if(msg.status == 200){
+                    Tools.toast('提交成功~~');
+                    $(".imgList").remove();
+                    $("#reset_ask_images").hide();
+                    Tools.closeUrl();
+                    Tools.refresh('questions_index');
+                }                
+            },  
+            error : function() {}  
+        })
+    })    
+    
+}) 
+</script>
+</body>
+</html>

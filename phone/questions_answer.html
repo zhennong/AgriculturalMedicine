@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<link type="text/css" rel="stylesheet" href="css/nywy.css"/>     
+<link type="text/css" rel="stylesheet" href="css/responsive.css" />   
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script type="text/javascript">
+	//登录状态判断            
+	window.uexOnload = function(){
+		Tools.getUserId();
+	}
+	
+	$(function () {
+	  $(".submit_btn").click(function () {
+		  var content = $("textarea").val();
+		  var askid = appcan.locStorage.getVal('askid');
+		  appcan.ajax({
+			type: 'get',
+			url: config.apiUrl,
+			data: {action: 'submit_questions_answer',content: content,userid:user_id,askid: askid},
+			dataType: 'jsonp',
+			jsonp: "jsoncallback",
+			success: function (msg) {
+				if (msg.status == 200) {
+				  appcan.locStorage.setVal('askid',askid);                          
+				  Tools.toast('提交成功');                          
+				  Tools.openUrl('questions_show',1);
+				}
+			},
+			error: function () {
+				//alert('fail');
+			}
+		  })
+	  })
+	})
+</script>
+</head>
+<body>
+<div class="box">
+	<div class="head">
+		<a class="back" onclick="Tools.closeUrl('questions_show')"><span><img src="image/return.png"></span></a>
+		<h3>我要回答</h3>
+	</div>
+
+	<div class="quick"> 
+		<textarea class="textarea" name="textarea" placeholder="请输入您的问题，并详细描述..."></textarea>
+		<input type="submit" class="submit_btn answer" value="提交回答"/>
+	</div>
+</div>
+</body>
+</html>

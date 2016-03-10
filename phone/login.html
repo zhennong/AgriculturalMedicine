@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<link type="text/css" rel="stylesheet" href="css/nywy.css" />
+<link type="text/css" rel="stylesheet" href="css/responsive.css" />
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script type="text/javascript" charset="utf-8">
+window.uexOnload = function () {
+  // 登录事件
+    $(".login_btn").click(function () {
+		var mobile = $("input[name='mobile']").val();
+		var password = $("input[name='password']").val();
+		if (mobile == '') {
+			Tools.toast('手机号不能为空');
+			return false;
+		}
+		if (!/^(13[0-9]|14[0-9]|15[0-9]|18[0-9])\d{8}$/i.test(mobile)) {
+			Tools.toast('手机号码格式不正确');
+			return false;
+		}
+		appcan.ajax({
+			type: 'get',
+			url: config.apiUrl,
+			data: {action: 'login', mobile: mobile, password: password},
+			dataType: 'jsonp',
+			jsonp: "jsoncallback",
+			success: function (msg) {
+				if (msg.status == 200) {
+				  appcan.locStorage.setVal('userid', msg.member_info['0']['userid']);
+				  appcan.locStorage.setVal('username', msg.member_info['0']['mobile']);
+				  appcan.window.openToast("登录成功！", 3000, '5', '0');
+				  Tools.openUrl('member');
+				  
+				  Tools.refresh('root');
+				  Tools.refresh('questions_index');
+				} else {
+				  Tools.toast(msg.msg);
+				}
+			},
+			error: function () {}
+		});
+	});
+}
+
+appcan.ready(function(){
+    $("input[name='mobile']").focus(function(){
+        uexWindow.showSoftKeyboard();
+    })
+})
+</script>
+</head>
+<body>
+<div class="box">
+	<div class="head">
+		<a id="back"><span><img src="image/return.png"></span></a>
+		<h3>会员登录</h3>
+	</div>
+	<div class="form_top">
+		<div><input name="mobile" type="text" maxlength="11"  class="login_txt" placeholder="请填写手机号码" /></div>
+		<div><input name="password" type="password"  class="login_txt" placeholder="请填写密码"/></div>
+		<button class="login_btn">登录</button>
+	</div>
+	<div class="gest">
+		<a onclick="Tools.openUrl('register')" class="gest_btn">注册农医问药</a>
+		<a onclick="Tools.openUrl('retrieve_password')" class="gest_btn forget_btn">忘记密码?</a>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<link type="text/css" rel="stylesheet" href="css/nywy.css" />
+<link type="text/css" rel="stylesheet" href="css/responsive.css" />
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/config.js" type="text/javascript"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script type="text/javascript">
+appcan.ready(function(){
+    Tools.getUserId();    
+})    
+</script>
+<script type="text/javascript">
+$(function(){ 
+var id_card_front = appcan.locStorage.getVal('sava_id_front_path');
+var id_card_back = appcan.locStorage.getVal('sava_id_back_path');        
+if(id_card_front != null){
+	$("#id_card_front").html("<img src='"+config.domainName + id_card_front+"' border=0 />");
+}else{
+	$("#id_card_front").html("+ 添加正面照片");
+}  
+  
+if(id_card_back != null){
+	$("#id_card_back").html("<img src='"+config.domainName + id_card_back+"' border=0 />");
+}else{
+	$("#id_card_back").html("+ 添加反面照片");
+}        
+
+$("#id_card_front").click(function(){
+	appcan.locStorage.remove('sava_id_front_path');
+})
+
+$("#id_card_back").click(function(){
+	appcan.locStorage.remove('sava_id_back_path');
+})
+
+$("#id_card_front,#id_card_back").click(function(){        
+	appcan.locStorage.getVal('name',$("input[name='name']").val());
+	appcan.locStorage.getVal('expect_type',$("input[name='expect_type']").val());
+	appcan.locStorage.getVal('good_at_crop',$("input[name='good_at_crop']").val());
+	appcan.locStorage.getVal('good_at_area',$("input[name='good_at_area']").val());
+	appcan.locStorage.getVal('qq',$("input[name='qq']").val());
+	appcan.locStorage.getVal('postion',$("input[name='postion']").val());
+	appcan.locStorage.getVal('company',$("input[name='company']").val());
+	appcan.locStorage.getVal('content',$("#content").val());
+}) 
+	
+$(".submit_btn").click(function(){    
+	var name = appcan.locStorage.getVal('name');
+	var expect_type = appcan.locStorage.getVal('expect_type');
+	var good_at_crop = appcan.locStorage.getVal('good_at_crop');
+	var good_at_area = appcan.locStorage.getVal('good_at_area');
+	var qq = appcan.locStorage.getVal('qq');
+	var postion = appcan.locStorage.getVal('postion');
+	var company = appcan.locStorage.getVal('company');        
+	var content = appcan.locStorage.getVal('content');  
+	if(name == null){
+		name = $("input[name='name']").val();
+	}
+	if(expect_type == null){
+		expect_type = $("input[name='expect_type']").val();
+	}
+	if(good_at_crop == null){
+		good_at_crop = $("input[name='good_at_crop']").val();
+	}
+	if(good_at_area == null){
+		good_at_area = $("input[name='good_at_area']").val();
+	}
+	if(qq == null){
+		qq = $("input[name='qq']").val();
+	}
+	if(postion == null){
+		postion = $("input[name='postion']").val();
+	}
+	if(company == null){
+		company = $("input[name='company']").val();
+	}
+	if(content == null){
+		content = $("textarea[name='content']").val();
+	}
+	
+	//input验证
+	if(name == null){
+		Tools.toast('姓名不能为空');
+		return false;
+	}
+	if(expect_type == null){
+		Tools.toast('专家类型不能为空');
+		return false;
+	}
+	if(good_at_crop == null){
+		Tools.toast('擅长作物不能为空');
+		return false;
+	}
+	if(good_at_area == null){
+		Tools.toast('擅长地区不能为空');
+		return false;
+	}
+	if(qq == null){
+		Tools.toast('QQ不能为空');
+		return false;
+	}
+	if(postion == null){
+		Tools.toast('职位不能为空');
+		return false;
+	}
+	if(company == null){
+		Tools.toast('单位不能为空');
+		return false;
+	}
+	if(content == null){
+		Tools.toast('简介不能为空');
+		return false;
+	}
+				 
+	$.ajax({
+		type:'get',  
+		url : config.apiUrl,
+data:{action:'submit_expert_authentication',userid:user_id,name:name,expect_type:expect_type,good_at_crop:good_at_crop,good_at_area:good_at_area,qq:qq,postion:postion,company:company,id_card_front:id_card_front,id_card_back:id_card_back,content:content},
+		dataType : 'jsonp',  
+		jsonp:"jsoncallback",  
+		success: function(msg) {  
+			if(msg.status == 200){
+				Tools.toast('提交成功~');                  
+				appcan.locStorage.remove('sava_id_front_path');
+				appcan.locStorage.remove('sava_id_back_path');
+				Tools.openUrl('member');                    
+			}else{
+				Tools.toast(msg.msg);              
+			}
+		},  
+		error : function() {  
+			//alert('fail');  
+		} 
+	});        
+});
+});
+</script> 
+
+</head>
+<body>
+<div class="box">
+	<div class="head">
+		<a class="back" onclick="Tools.closeUrl('member')"><span><img src="image/return.png"></span></a>
+		<h3>专家认证</h3>
+	</div>
+	
+  <form class="top_jj">
+		<div class="form_group">
+			<input type="hidden" name="userid" id="userid" value=""/>
+			<div class="col_sm">
+				<label>姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名：</label> 
+				<input name="name" type="text" class="form_con"  placeholder="必填"/>
+			</div>
+			<div class="col_sm">
+				<label>专家类型：</label>
+				<input name="expect_type" type="text" class="form_con" placeholder="必填" />
+			</div>
+			<div class="col_sm">
+				<label>擅长作物：</label>
+				<input name="good_at_crop" type="text" class="form_con" placeholder="必填"/>
+			</div>
+			<div class="col_sm bor_bot">
+				<label>擅长地区：</label>
+				<input name="good_at_area" type="text" class="form_con" placeholder="必填"/>
+			</div>
+			<div class="clear"></div>
+		</div>
+		
+		<div class="form_group">
+			<div class="col_sm">
+				<label>QQ：</label> 
+				<input name="qq" type="text" class="form_con" placeholder="输入QQ号"/>
+			</div>
+			<div class="col_sm">
+				<label>职位：</label>
+				<input name="postion" type="text" class="form_con" placeholder="输入职位名称" />
+			</div>
+			<div class="col_sm bor_bot">
+				<label>单位：</label>
+				<input name="company" type="text" class="form_con"  placeholder="输入单位"/>
+			</div>
+			<div class="clear"></div>
+		</div>
+		
+		<div class="form_group">
+			<div class="col_sm">
+				<label>添加证件照片：</label> 
+				<input name="" type="text" class="form_con" placeholder="必填"/>
+			</div>
+			<div class="photo">
+				<a onclick="Tools.openUrl('upload_expert_front_image')" id="id_card_front"></a>
+				<a onclick="Tools.openUrl('upload_expert_back_image')" id="id_card_back"></a>
+			</div>
+			<div class="clear"></div>
+		</div>
+		
+		<div class="form_group padding10">
+			<div class="col_sm">
+				 <label>简介：</label> 
+				 <textarea name="content"></textarea>
+			</div>
+			
+			<div class="clear"></div>
+		</div>
+		<button type="submit" class="submit_btn">提交</button>
+  </form>
+</div>
+<div class="h100"></div>   
+</body>
+</html>

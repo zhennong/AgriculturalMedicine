@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<link type="text/css" rel="stylesheet" href="css/main.css" />
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/config.js" type="text/javascript"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(function(){    
+    var CategoryMethod = {
+        action:'get_category_list',
+        get_category_list_title:function(){          
+            $.ajax({
+                url: config.apiUrl,
+                type: 'GET',
+                data: {action:CategoryMethod.action,pid:0},
+                dataType: 'json',
+                async:false,
+                success: function (msg) {
+                    if(msg.status == 200){
+                        var x = msg.category_list_info;                        
+                        var y = '';
+                        $.each(x, function (index, value) {
+                            y += "<li class='select_cate0' data-id=" + x[index]['id'] + " >"+x[index]['cat_name']+"</li>";                 
+                        });
+                        y += '<div class="clear"></div>';
+                        
+                        $("ul.list_nav").html(y);
+                    }
+                }
+            }) ;
+        }
+    } 
+    
+    $(".list_nav").on('click','li',function(){
+        $(".select_cate0").removeClass('hover');
+        $(this).addClass('hover');
+        var pid = $(this).data('id');
+        $.ajax({
+            url:config.apiUrl,
+            type:'GET',
+            data:{action:CategoryMethod.action,pid:pid},
+            dataType: 'json',
+            async:false,
+            success:function(msg){
+                if(msg.status == 200){
+                    var y = '';
+                    if(msg.category_list_info){
+                        var x = msg.category_list_info;
+                        $.each(x,function(index, value){
+                            y += "<div class='select_crop select_date1' data-id='" + x[index]['id'] + "'><p class='select_crop_t show_cate1_name'>" + x[index]['cat_name'] + "</p><ul class='hidden'></ul></div>";
+                        });
+                    }
+                    $(".Contentbox").html(y);
+                    $(".Contentbox").append("<div class='clear'></div>");
+                }
+            }
+        });
+        $(".show_cate1_name").trigger("click");
+    });
+    
+    $(".Contentbox").on('click','.show_cate1_name',function(){
+        var p_obj = $(this).parents('.select_date1');
+        var pid = p_obj.data('id');
+        $.ajax({
+            url:config.apiUrl,
+            type:'GET',
+            data:{action:CategoryMethod.action,pid:pid},
+            dataType: 'json',
+            async:false,
+            success:function(msg){
+                if(msg.status == 200){
+                    var y = '';
+                    if(msg.category_list_info){
+                        var x = msg.category_list_info;
+                        $.each(x,function(index, value){
+                            y += "<li class='cate2_li_show' data-id='" + x[index]['id'] + "'><img src='"+config.uploads_path+x[index]['cat_img']+"' class='select_crop_icon cate2_show'>" + x[index]['cat_name'] + "</li>";
+                        });
+                    }
+                    p_obj.find('ul').html(y);
+                    p_obj.find('ul').append("<div class='clear'></div>");
+                }
+            }
+        });
+        p_obj.find('ul').toggle();
+    });
+    
+    $(".Contentbox").on('click','.cate2_li_show',function(){
+        if(!user_id){
+            Tools.openUrl('login');
+        }
+        var cat_id = $(this).data('id');
+        $.ajax({
+            type:'GET',  
+            url : config.apiUrl, 
+            data:{action:'add_select_category',userid:user_id,cat_id:cat_id},
+            dataType : 'jsonp',  
+            jsonp:"jsoncallback",  
+            success  : function(msg) { 
+                if(msg.status == 200){
+                    Tools.toast("添加成功");
+                    Tools.closeUrl();
+                    Tools.refresh('questions_index');
+                }else if(msg.status == 217){
+                    Tools.toast("已添加");
+                }else{
+                    Tools.toast("添加失败");
+                }
+            }
+        });
+    });
+    
+    CategoryMethod.get_category_list_title();
+    $(".list_nav li").first().trigger('click');     
+});
+ 
+</script>
+</head>
+<body>    
+<div class="box">
+	<div class="head">
+		<a class="back" onclick="Tools.openUrl('questions_index',1)"><span><img src="image/return.png"></span></a>
+		<h3>选择作物</h3>			
+	</div>
+	
+	<div class="ans_nav">
+		<ul class="list_nav"></ul> 
+	</div>
+	<div class="select_crop_list">
+		<div class="Contentbox"></div>		
+	</div>
+</div>
+</body>
+</html>

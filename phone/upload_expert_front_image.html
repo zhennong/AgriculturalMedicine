@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="ui-mobile">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0">
+<meta charset="utf-8">
+<link type="text/css" rel="stylesheet" href="css/nywy.css" />
+<link type="text/css" rel="stylesheet" href="css/responsive.css" />
+<script src="js/wap_jquery.js" type="text/javascript"></script>
+<script src="js/appcan.js" type="text/javascript"></script>
+<script src="js/config.js" type="text/javascript"></script>
+<script src="js/common.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(function(){
+	Tools.getUserId();
+})
+</script>
+</head>
+<body >
+<div class="box">
+	<div class="head">
+		<a class="back" onclick="Tools.openUrl('member',1)"><span><img src="image/return.png"></span></a>
+		<h3>上传身份证件正面图片</h3>
+	</div>
+
+	<div class="form_top"></div>
+
+	<div class="my_order hidden" id="show_avatar">
+		<img src="' + data + '" width="300" height="300">
+		<div class="gest_btn" id="upload_avatar">上传</div>
+	</div>
+
+	<div class="gest">
+		<div id="take_picture" class="gest_btn">拍照</div>
+		<div id="select_from_album" class="gest_btn">从相册选择</div>
+	</div>
+</div>
+</body>
+</html>
+
+<script type="text/javascript">
+appcan.ready(function () {
+	// 拍照
+	$("#take_picture").click(function(){
+		uexCamera.open();
+		uexCamera.cbOpen = function(opCode, dataType, data){
+			$("#show_avatar img").attr('src',data);
+			$("#show_avatar").show();
+		}
+	});
+	// 从相册选择
+	$("#select_from_album").click(function() {
+		uexImageBrowser.pick();
+		uexImageBrowser.cbPick = function(opCode, dataType, data){
+			$("#show_avatar img").attr('src',data);
+			$("#show_avatar").show();
+		}
+	});
+	// 上传图片
+	$("#upload_avatar").click(function() {
+		uexUploaderMgr.createUploader(1, config.apiUrl + "?action=upload_id_card_front&userid="+appcan.locStorage.getVal('userid'));
+		uexUploaderMgr.cbCreateUploader = function (opCode, dataType, data) {
+			if (data == 0) {
+				uexUploaderMgr.uploadFile(1, $("#show_avatar img").attr('src'), "filename", 4);
+				uexWindow.toast(1, 5, "头像上传ing...", 0);
+			}
+		}
+		uexUploaderMgr.onStatus = function (opCode, fileSize, percent, serverPath, status) {
+			switch (status) {
+				case 0:
+					setLog("上传进度："+percent+"%");
+					break;
+				case 1:
+					//setLog(serverPath);
+					uexWindow.closeToast();//关闭提示消息框
+					uexWindow.toast(0, 5, "上传成功~", 2000);
+					//uexWindow.closeToast();//关闭提示消息框
+					uexUploaderMgr.closeUploader(1);
+					appcan.locStorage.setVal('sava_id_front_path',serverPath);
+					Tools.closeUrl();
+                    Tools.refresh('member_validate');
+                    
+					break;
+				case 2:
+					//setLog("上传出错");
+					uexWindow.closeToast();//关闭提示消息框
+					uexWindow.toast(0, 5, "出错啦~", 2000);
+					//uexWindow.closeToast();//关闭提示消息框
+					uexUploaderMgr.closeUploader(1);
+					break;
+			}
+		}
+	});
+});
+</script>
